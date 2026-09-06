@@ -4,7 +4,7 @@
 
 The Save Restricted Content Bot is a stable Telegram bot developed by devgagan and TEAM SPY. It enables users to forward (no forward tag) messages from Telegram channels and groups, offering features such as custom thumbnail support and the ability to upload files up to 4GB. Additionally, the bot supports downloading videos from platforms like YouTube, Instagram, and Facebook, along with over 100 other sites(which ytdlp supports)
 
-[Telegram](https://t.me/save_restricted_content_bots) | [See Recent Updates](https://github.com/devgaganin/Save-Restricted-Content-Bot-V2/tree/v3#updates)
+[Telegram](https://t.me/restbots) | [See Recent Updates](https://github.com/devgaganin/Save-Restricted-Content-Bot-V2/tree/v3#updates)
 
 ### Star the repo it motivate us to update new features
 Please do start and max fork thanks 
