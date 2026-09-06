@@ -199,6 +199,6 @@ Visit the [Terms of Use](https://github.com/devgaganin/Save-Restricted-Content-B
 
 
 <h3 align="center">
-  Developed with ❤️ by <a href="https://t.me/team_spy_pro"> Gagan </a>
+  Developed with ❤️ by <a href="https://t.me/restbots"> Gagan </a>
 </h3>
 
