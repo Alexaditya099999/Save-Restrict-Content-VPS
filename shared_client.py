@@ -9,18 +9,18 @@ from pyrogram import utils as pyro_utils
 import sys
 
 # ════════════════════════════════════════════════════════════════════════════════
-# 🚀 FAST MODE SETTINGS (DOWNLOAD + UPLOAD DONO MAXIMUM)
+# 🚀 FAST MODE SETTINGS (DOWNLOAD + UPLOAD DONO FAST, DB SAFE)
 # ════════════════════════════════════════════════════════════════════════════════
 
-# ✅ FIX 1: Chunk size 8MB (max allowed, download speed boost)
-pyro_utils.MIN_CHUNK_SIZE = 8 * 1024 * 1024  # 8MB per chunk
+# ✅ Chunk size 4MB (fast download, DB pe load nahi)
+pyro_utils.MIN_CHUNK_SIZE = 4 * 1024 * 1024
 
-# ✅ FIX 2: Workers 64 (maximum parallel download)
-pyro_utils.MAX_WORKERS = 64
+# ✅ Workers 24 (pehle jitna tha, DB crash nahi hoga)
+pyro_utils.MAX_WORKERS = 24
 
-# ✅ FIX 3: Concurrent transmissions 32 (zyada chunks ek saath)
+# ✅ Concurrent transmissions 12 (balanced)
 if hasattr(pyro_utils, "MAX_CONCURRENT_TRANSMISSIONS"):
-    pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = 32
+    pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = 12
 
 try:
     import cryptg
@@ -29,7 +29,7 @@ except ImportError:
     print("⚠️ cryptg not installed — run: pip install cryptg")
 
 # ════════════════════════════════════════════════════════════════════════════════
-# ░ CLIENT SETUP (DOWNLOAD + UPLOAD DONO FAST)
+# ░ CLIENT SETUP
 # ════════════════════════════════════════════════════════════════════════════════
 
 client = TelegramClient("telethonbot", API_ID, API_HASH)
@@ -39,7 +39,7 @@ app = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
-    workers=64,          # ✅ 32 se 64 kiya
+    workers=24,          # ✅ 64 se 24 kiya (DB safe)
     sleep_threshold=30,
 )
 
@@ -48,7 +48,7 @@ userbot = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     session_string=STRING,
-    workers=64,          # ✅ 32 se 64 kiya
+    workers=24,          # ✅ 64 se 24 kiya
     sleep_threshold=30,
 ) if STRING else None
 
