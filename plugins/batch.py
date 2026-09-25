@@ -23,6 +23,7 @@ Z, P, UB, UC, emp = {}, {}, {}, {}, {}
 ACTIVE_USERS = {}
 ACTIVE_USERS_FILE = "active_users.json"
 
+# fixed directory file_name problems 
 def sanitize(filename):
     return re.sub(r'[<>:"/\\|?*\']', '_', filename).strip(" .")[:255]
 
@@ -84,50 +85,31 @@ async def upd_dlg(c):
         print(f'Failed to update dialogs: {e}')
         return False
 
-
+# fixed the old group of 2021-2022 extraction 🌝 (buy krne ka fayda nhi ab old group) ✅ 
 async def get_msg(c, u, i, d, lt):
     try:
         if lt == 'public':
             try:
-                if u:
-                    try:
-                        xm = await u.get_messages(i, d)
-                        emp[i] = getattr(xm, "empty", False)
-                        if not emp[i]:
-                            print(f"✅ Public msg fetched by userbot {i}")
-                            return xm
-                    except Exception as e:
-                        print(f"Userbot public fetch error: {e}")
-                        emp[i] = True
-
-                try:
-                    if str(i).lower().endswith('bot'):
-                        xm = await u.get_messages(i, d) if u else None
-                    else:
-                        xm = await c.get_messages(i, d)
+                if str(i).lower().endswith('bot'):
+                    emp[i] = False
+                    xm = await u.get_messages(i, d)
                     emp[i] = getattr(xm, "empty", False)
                     if not emp[i]:
-                        print(f"✅ Public msg fetched by bot token {i}")
+                        emp[i] = True
+                        print(f"Bot chat found successfully...")
                         return xm
-                except Exception as e:
-                    print(f'Bot token public fetch error: {e}')
-                    emp[i] = True
-                
-                if u and emp[i]:
-                    try:
-                        await u.join_chat(i)
-                    except Exception:
-                        pass
-                    try:
+                    
+                if emp[i]:
+                    xm = await c.get_messages(i, d)
+                    print(f"fetched by {c.me.username}")
+                    emp[i] = getattr(xm, "empty", False)
+                    if emp[i]:
+                        print(f"Not fetched by {c.me.username}")
+                        try: await u.join_chat(i)
+                        except: pass
                         xm = await u.get_messages((await u.get_chat(f"@{i}")).id, d)
-                        emp[i] = getattr(xm, "empty", False)
-                        if not emp[i]:
-                            print(f"✅ Public msg fetched after join {i}")
-                            return xm
-                    except Exception as e:
-                        print(f'Join+fetch error: {e}')
-                
-                return None
+                    
+                    return xm                   
             except Exception as e:
                 print(f'Error fetching public message: {e}')
                 return None
@@ -136,9 +118,11 @@ async def get_msg(c, u, i, d, lt):
                 try:
                     async for _ in u.get_dialogs(limit=50): pass
                     
+                    # Try with -100 prefix first
                     if str(i).startswith('-100'):
                         chat_id_100 = i
-                        base_id = str(i)[4:]
+                        # For - prefix, remove -100 and add just -
+                        base_id = str(i)[4:]  # Remove -100
                         chat_id_dash = f"-{base_id}"
                     elif i.isdigit():
                         chat_id_100 = f"-100{i}"
@@ -147,6 +131,7 @@ async def get_msg(c, u, i, d, lt):
                         chat_id_100 = i
                         chat_id_dash = i
                     
+                    # Try -100 format first
                     try:
                         result = await u.get_messages(chat_id_100, d)
                         if result and not getattr(result, "empty", False):
@@ -154,6 +139,7 @@ async def get_msg(c, u, i, d, lt):
                     except Exception:
                         pass
                     
+                    # Try - format second
                     try:
                         result = await u.get_messages(chat_id_dash, d)
                         if result and not getattr(result, "empty", False):
@@ -161,6 +147,7 @@ async def get_msg(c, u, i, d, lt):
                     except Exception:
                         pass
                     
+                    # Final fallback - refresh dialogs and try original
                     try:
                         async for _ in u.get_dialogs(limit=200): pass
                         result = await u.get_messages(i, d)
@@ -252,8 +239,6 @@ async def send_direct(c, m, tcid, ft=None, rtmid=None):
         print(f'Direct send error: {e}')
         return False
 
-
-# ✅ FIXED: Public channel ke liye DIRECT FORWARD, download-upload nahi
 async def process_msg(c, u, m, d, lt, uid, i):
     try:
         cfg_chat = await get_user_data_key(d, 'chat_id', None)
@@ -267,45 +252,15 @@ async def process_msg(c, u, m, d, lt, uid, i):
             else:
                 tcid = int(cfg_chat)
         
-        # ✅ PUBLIC CHANNEL: Seedha forward_messages use karo (1 second mein)
-        if lt == 'public':
-            try:
-                # Pehle try karo bot token se direct forward
-                if not str(i).lower().endswith('bot'):
-                    try:
-                        await c.forward_messages(tcid, i, m.id, reply_to_message_id=rtmid)
-                        print(f"✅ Forwarded directly by bot token: {i}/{m.id}")
-                        return 'Done.'
-                    except Exception as e:
-                        print(f'Bot forward error: {e}')
-                
-                # Bot se fail ho, toh userbot se forward karo
-                if u:
-                    try:
-                        await u.forward_messages(tcid, i, m.id, reply_to_message_id=rtmid)
-                        print(f"✅ Forwarded directly by userbot: {i}/{m.id}")
-                        return 'Done.'
-                    except Exception as e:
-                        print(f'Userbot forward error: {e}')
-                
-                # Dono fail, toh file_id se send karo (last resort)
-                if not emp.get(i, False):
-                    success = await send_direct(c, m, tcid, None, rtmid)
-                    if success:
-                        print(f"✅ Sent directly by file_id: {i}/{m.id}")
-                        return 'Done.'
-                
-                # Sab fail — download+upload fallback
-                print(f"⚠️ All direct methods failed for {i}/{m.id}, using download+upload")
-            except Exception as e:
-                print(f'Public forward error: {e}')
-        
-        # ✅ DOWNLOAD + UPLOAD (private channels ya fallback)
         if m.media:
             orig_text = m.caption.markdown if m.caption else ''
             proc_text = await process_text_with_rules(d, orig_text)
             user_cap = await get_user_data_key(d, 'caption', '')
             ft = f'{proc_text}\n\n{user_cap}' if proc_text and user_cap else user_cap if user_cap else proc_text
+            
+            if lt == 'public' and not emp.get(i, False):
+                await send_direct(c, m, tcid, ft, rtmid)
+                return 'Sent directly.'
             
             st = time.time()
             p = await c.send_message(d, 'Downloading...')
@@ -479,7 +434,7 @@ async def text_handler(c, m):
     s = Z[uid].get('step')
     x = await get_ubot(uid)
     if not x:
-        await m.reply("Add your bot /setbot `token`")
+        await message.reply("Add your bot /setbot `token`")
         return
 
     if s == 'start':
@@ -602,3 +557,6 @@ async def text_handler(c, m):
         finally:
             await remove_active_batch(uid)
             Z.pop(uid, None)
+
+
+
