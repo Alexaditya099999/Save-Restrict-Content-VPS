@@ -47,6 +47,7 @@ userbot = Client(
     sleep_threshold=30,
 ) if STRING else None
 
+
 async def start_client():
     if not client.is_connected():
         await client.start(bot_token=BOT_TOKEN)
@@ -60,4 +61,12 @@ async def start_client():
             sys.exit(1)
     await app.start()
     print("Pyro App Started...")
+
+    # ✅ YEH 4 LINES ADD KI HAIN — "Event loop is closed" ERROR FIX
+    import atexit
+    atexit.register(lambda: client.disconnect() if client.is_connected() else None)
+    if userbot:
+        atexit.register(lambda: userbot.stop())
+    atexit.register(lambda: app.stop())
+
     return client, app, userbot
