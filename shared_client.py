@@ -9,18 +9,18 @@ from pyrogram import utils as pyro_utils
 import sys
 
 # ════════════════════════════════════════════════════════════════════════════════
-# 🚀 FAST MODE SETTINGS (DOWNLOAD + UPLOAD DONO FAST)
+# 🚀 FAST MODE SETTINGS (DOWNLOAD + UPLOAD DONO MAXIMUM)
 # ════════════════════════════════════════════════════════════════════════════════
 
-# ✅ FIX: Chunk size ko 1MB se badha kar 4MB kiya (download speed boost)
-pyro_utils.MIN_CHUNK_SIZE = 4 * 1024 * 1024  # 4MB per chunk
+# ✅ FIX 1: Chunk size 8MB (max allowed, download speed boost)
+pyro_utils.MIN_CHUNK_SIZE = 8 * 1024 * 1024  # 8MB per chunk
 
-# ✅ FIX: Workers badha diye (parallel download)
-pyro_utils.MAX_WORKERS = 32  # Pehle 24 tha, ab 32
+# ✅ FIX 2: Workers 64 (maximum parallel download)
+pyro_utils.MAX_WORKERS = 64
 
-# ✅ FIX: Concurrent transmissions badha diye (ek saath zyada chunks download honge)
+# ✅ FIX 3: Concurrent transmissions 32 (zyada chunks ek saath)
 if hasattr(pyro_utils, "MAX_CONCURRENT_TRANSMISSIONS"):
-    pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = 24  # Pehle 12 tha, ab 24
+    pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = 32
 
 try:
     import cryptg
@@ -39,7 +39,7 @@ app = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
-    workers=32,          # ✅ 24 se 32 kiya (download + upload parallel)
+    workers=64,          # ✅ 32 se 64 kiya
     sleep_threshold=30,
 )
 
@@ -48,7 +48,7 @@ userbot = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     session_string=STRING,
-    workers=32,          # ✅ 24 se 32 kiya
+    workers=64,          # ✅ 32 se 64 kiya
     sleep_threshold=30,
 ) if STRING else None
 
