@@ -6,8 +6,7 @@ from telethon import TelegramClient
 from config import API_ID, API_HASH, BOT_TOKEN, STRING
 from config import (
     PYRO_CHUNK_SIZE, PYRO_WORKERS, PYRO_MAX_CONCURRENT,
-    TELETHON_RETRIES, TELETHON_CONNECTION_MODE,
-    USE_CRYPTG, USE_IPV6, FAST_UPLOAD
+    TELETHON_RETRIES, USE_CRYPTG, USE_IPV6
 )
 from pyrogram import Client
 from pyrogram import utils as pyro_utils
@@ -18,15 +17,12 @@ import sys
 # ════════════════════════════════════════════════════════════════════════════════
 
 # --- Pyrogram Speed Boost ---
-# Chunk size badhao (default 256KB -> 1MB)
 pyro_utils.MIN_CHUNK_SIZE = PYRO_CHUNK_SIZE
-# Workers badhao (parallel connections)
 pyro_utils.MAX_WORKERS = PYRO_WORKERS
-# Max concurrent transmissions
 if hasattr(pyro_utils, "MAX_CONCURRENT_TRANSMISSIONS"):
     pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = PYRO_MAX_CONCURRENT
 
-# --- cryptg check (faster encryption) ---
+# --- cryptg check ---
 if USE_CRYPTG:
     try:
         import cryptg
@@ -39,6 +35,7 @@ if USE_CRYPTG:
 # ════════════════════════════════════════════════════════════════════════════════
 
 # Telethon client - fast connection mode
+# NOTE: connection_mode argument hata diya kyunki Telethon mein ye support nahi hai
 client = TelegramClient(
     "telethonbot",
     API_ID,
@@ -47,7 +44,6 @@ client = TelegramClient(
     retry_delay=1,
     auto_reconnect=True,
     use_ipv6=USE_IPV6,
-    connection_mode=TELETHON_CONNECTION_MODE,
 )
 
 # Pyrogram bot client - fast settings
