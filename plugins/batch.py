@@ -23,7 +23,6 @@ Z, P, UB, UC, emp = {}, {}, {}, {}, {}
 ACTIVE_USERS = {}
 ACTIVE_USERS_FILE = "active_users.json"
 
-# fixed directory file_name problems 
 def sanitize(filename):
     return re.sub(r'[<>:"/\\|?*\']', '_', filename).strip(" .")[:255]
 
@@ -85,44 +84,64 @@ async def upd_dlg(c):
         print(f'Failed to update dialogs: {e}')
         return False
 
-# fixed the old group of 2021-2022 extraction 🌝 (buy krne ka fayda nhi ab old group) ✅ 
+
+# ✅ FIXED: get_msg with proper error logging
 async def get_msg(c, u, i, d, lt):
     try:
         if lt == 'public':
             try:
-                if str(i).lower().endswith('bot'):
-                    emp[i] = False
-                    xm = await u.get_messages(i, d)
+                if u:
+                    try:
+                        xm = await u.get_messages(i, d)
+                        emp[i] = getattr(xm, "empty", False)
+                        if not emp[i]:
+                            print(f"✅ Public msg fetched by userbot {i}")
+                            return xm
+                    except Exception as e:
+                        print(f"Userbot public fetch error: {e}")
+                        emp[i] = True
+
+                try:
+                    if str(i).lower().endswith('bot'):
+                        xm = await u.get_messages(i, d) if u else None
+                    else:
+                        xm = await c.get_messages(i, d)
                     emp[i] = getattr(xm, "empty", False)
                     if not emp[i]:
-                        emp[i] = True
-                        print(f"Bot chat found successfully...")
+                        print(f"✅ Public msg fetched by bot token {i}")
                         return xm
-                    
-                if emp[i]:
-                    xm = await c.get_messages(i, d)
-                    print(f"fetched by {c.me.username}")
-                    emp[i] = getattr(xm, "empty", False)
-                    if emp[i]:
-                        print(f"Not fetched by {c.me.username}")
-                        try: await u.join_chat(i)
-                        except: pass
+                except Exception as e:
+                    print(f'Bot token public fetch error: {e}')
+                    emp[i] = True
+                
+                if u and emp[i]:
+                    try:
+                        await u.join_chat(i)
+                    except Exception:
+                        pass
+                    try:
                         xm = await u.get_messages((await u.get_chat(f"@{i}")).id, d)
-                    
-                    return xm                   
+                        emp[i] = getattr(xm, "empty", False)
+                        if not emp[i]:
+                            print(f"✅ Public msg fetched after join {i}")
+                            return xm
+                    except Exception as e:
+                        print(f'Join+fetch error: {e}')
+                
+                return None
             except Exception as e:
                 print(f'Error fetching public message: {e}')
                 return None
         else:
+            # ✅ PRIVATE CHANNEL
             if u:
                 try:
+                    print(f"🔍 Private fetch attempt: {i} / {d}")
                     async for _ in u.get_dialogs(limit=50): pass
                     
-                    # Try with -100 prefix first
                     if str(i).startswith('-100'):
                         chat_id_100 = i
-                        # For - prefix, remove -100 and add just -
-                        base_id = str(i)[4:]  # Remove -100
+                        base_id = str(i)[4:]
                         chat_id_dash = f"-{base_id}"
                     elif i.isdigit():
                         chat_id_100 = f"-100{i}"
@@ -131,36 +150,38 @@ async def get_msg(c, u, i, d, lt):
                         chat_id_100 = i
                         chat_id_dash = i
                     
-                    # Try -100 format first
                     try:
                         result = await u.get_messages(chat_id_100, d)
                         if result and not getattr(result, "empty", False):
+                            print(f"✅ Private msg fetched (-100) {i}/{d}")
                             return result
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        print(f'Private fetch -100 error: {e}')
                     
-                    # Try - format second
                     try:
                         result = await u.get_messages(chat_id_dash, d)
                         if result and not getattr(result, "empty", False):
+                            print(f"✅ Private msg fetched (-) {i}/{d}")
                             return result
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        print(f'Private fetch - error: {e}')
                     
-                    # Final fallback - refresh dialogs and try original
                     try:
                         async for _ in u.get_dialogs(limit=200): pass
                         result = await u.get_messages(i, d)
                         if result and not getattr(result, "empty", False):
+                            print(f"✅ Private msg fetched (original) {i}/{d}")
                             return result
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        print(f'Private fetch original error: {e}')
                     
+                    print(f"❌ Private msg NOT FOUND: {i}/{d}")
                     return None
                             
                 except Exception as e:
                     print(f'Private channel error: {e}')
                     return None
+            print("❌ Userbot (u) is None for private channel!")
             return None
     except Exception as e:
         print(f'Error fetching message: {e}')
@@ -239,6 +260,8 @@ async def send_direct(c, m, tcid, ft=None, rtmid=None):
         print(f'Direct send error: {e}')
         return False
 
+
+# ✅ FIXED: process_msg with fallbacks and error logging
 async def process_msg(c, u, m, d, lt, uid, i):
     try:
         cfg_chat = await get_user_data_key(d, 'chat_id', None)
@@ -252,15 +275,43 @@ async def process_msg(c, u, m, d, lt, uid, i):
             else:
                 tcid = int(cfg_chat)
         
+        # ✅ PUBLIC CHANNEL
+        if lt == 'public':
+            try:
+                if u:
+                    try:
+                        await u.join_chat(i)
+                    except Exception:
+                        pass
+                if u:
+                    try:
+                        await u.forward_messages(tcid, i, m.id, reply_to_message_id=rtmid)
+                        print(f"✅ Forwarded by userbot: {i}/{m.id}")
+                        return 'Done.'
+                    except Exception as e:
+                        print(f'Userbot forward error: {e}')
+                if not str(i).lower().endswith('bot'):
+                    try:
+                        await c.forward_messages(tcid, i, m.id, reply_to_message_id=rtmid)
+                        print(f"✅ Forwarded by bot token: {i}/{m.id}")
+                        return 'Done.'
+                    except Exception as e:
+                        print(f'Bot forward error: {e}')
+                if not emp.get(i, False):
+                    success = await send_direct(c, m, tcid, None, rtmid)
+                    if success:
+                        print(f"✅ Sent by file_id: {i}/{m.id}")
+                        return 'Done.'
+                print(f"⚠️ Public direct failed for {i}/{m.id}, using download+upload")
+            except Exception as e:
+                print(f'Public forward error: {e}')
+        
+        # ✅ DOWNLOAD + UPLOAD
         if m.media:
             orig_text = m.caption.markdown if m.caption else ''
             proc_text = await process_text_with_rules(d, orig_text)
             user_cap = await get_user_data_key(d, 'caption', '')
             ft = f'{proc_text}\n\n{user_cap}' if proc_text and user_cap else user_cap if user_cap else proc_text
-            
-            if lt == 'public' and not emp.get(i, False):
-                await send_direct(c, m, tcid, ft, rtmid)
-                return 'Sent directly.'
             
             st = time.time()
             p = await c.send_message(d, 'Downloading...')
@@ -286,9 +337,21 @@ async def process_msg(c, u, m, d, lt, uid, i):
                 file_name = f"{time.time()}.jpg"
                 c_name = sanitize(file_name)
     
-            f = await u.download_media(m, file_name=c_name, progress=prog, progress_args=(c, d, p.id, st))
+            # ✅ Download with userbot, fallback to file_id send
+            f = None
+            try:
+                f = await u.download_media(m, file_name=c_name, progress=prog, progress_args=(c, d, p.id, st))
+            except Exception as e:
+                print(f'Download error: {e}')
+                f = None
             
+            # ✅ If download failed, try file_id direct send
             if not f:
+                print(f"⚠️ Download failed for {i}/{m.id}, trying file_id send...")
+                success = await send_direct(c, m, tcid, ft, rtmid)
+                if success:
+                    await c.delete_messages(d, p.id)
+                    return 'Done (file_id).'
                 await c.edit_message_text(d, p.id, 'Failed.')
                 return 'Failed.'
             
@@ -375,6 +438,7 @@ async def process_msg(c, u, m, d, lt, uid, i):
                                         progress=prog, progress_args=(c, d, p.id, st), 
                                         reply_to_message_id=rtmid)
             except Exception as e:
+                print(f'Upload error: {e}')
                 await c.edit_message_text(d, p.id, f'Upload failed: {str(e)[:30]}')
                 if os.path.exists(f): os.remove(f)
                 return 'Failed.'
@@ -388,6 +452,7 @@ async def process_msg(c, u, m, d, lt, uid, i):
             await c.send_message(tcid, text=m.text.markdown, reply_to_message_id=rtmid)
             return 'Sent.'
     except Exception as e:
+        print(f'process_msg fatal error: {e}')
         return f'Error: {str(e)[:50]}'
         
 @X.on_message(filters.command(['batch', 'single']))
@@ -434,7 +499,7 @@ async def text_handler(c, m):
     s = Z[uid].get('step')
     x = await get_ubot(uid)
     if not x:
-        await message.reply("Add your bot /setbot `token`")
+        await m.reply("Add your bot /setbot `token`")
         return
 
     if s == 'start':
@@ -484,6 +549,7 @@ async def text_handler(c, m):
             else:
                 await pt.edit('Message not found')
         except Exception as e:
+            print(f'single error: {e}')
             await pt.edit(f'Error: {str(e)[:50]}')
         finally:
             Z.pop(uid, None)
@@ -503,6 +569,7 @@ async def text_handler(c, m):
         Z[uid].update({'step': 'process', 'did': str(m.chat.id), 'num': count})
         i, s, n, lt = Z[uid]['cid'], Z[uid]['sid'], Z[uid]['num'], Z[uid]['lt']
         success = 0
+        fail = 0
 
         pt = await m.reply_text('Processing batch...')
         uc = await get_uclient(uid)
@@ -541,22 +608,25 @@ async def text_handler(c, m):
                     msg = await get_msg(ubot, uc, i, mid, lt)
                     if msg:
                         res = await process_msg(ubot, uc, msg, str(m.chat.id), lt, uid, i)
+                        print(f"Batch {j+1}/{n}: {res}")
                         if 'Done' in res or 'Copied' in res or 'Sent' in res:
                             success += 1
+                        else:
+                            fail += 1
                     else:
-                        pass
+                        fail += 1
+                        print(f"❌ Batch {j+1}/{n}: Message not found")
                 except Exception as e:
+                    fail += 1
+                    print(f"❌ Batch {j+1}/{n}: Error - {str(e)[:50]}")
                     try: await pt.edit(f'{j+1}/{n}: Error - {str(e)[:30]}')
                     except: pass
                 
                 await asyncio.sleep(10)
             
             if j+1 == n:
-                await m.reply_text(f'Batch Completed ✅ Success: {success}/{n}')
+                await m.reply_text(f'Batch Completed ✅ Success: {success}/{n}, ❌ Fail: {fail}/{n}')
         
         finally:
             await remove_active_batch(uid)
             Z.pop(uid, None)
-
-
-
