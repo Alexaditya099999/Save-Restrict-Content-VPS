@@ -1,47 +1,56 @@
-# Copyright (c) 2025 devgagan : https://github.com/devgaganin.  
-# Licensed under the GNU General Public License v3.0.  
+# Copyright (c) 2025 devgagan : https://github.com/devgaganin.
+# Licensed under the GNU General Public License v3.0.
 # See LICENSE file in the repository root for full license text.
 
 from telethon import TelegramClient
 from config import API_ID, API_HASH, BOT_TOKEN, STRING
+from config import (
+    PYRO_CHUNK_SIZE, PYRO_WORKERS, PYRO_MAX_CONCURRENT,
+    TELETHON_RETRIES, USE_CRYPTG, USE_IPV6
+)
 from pyrogram import Client
 from pyrogram import utils as pyro_utils
 import sys
 
 # ════════════════════════════════════════════════════════════════════════════════
-# 🚀 FAST MODE SETTINGS (Speed Boost)
+# ░ 🚀 FAST MODE OVERRIDES (Speed Boost)
 # ════════════════════════════════════════════════════════════════════════════════
 
-# Pyrogram chunk size 1MB (default 256KB se 4x bada)
-pyro_utils.MIN_CHUNK_SIZE = 1024 * 1024
-
-# Parallel workers 24 (zyada connections = zyada speed)
-pyro_utils.MAX_WORKERS = 24
-
-# Max concurrent transmissions
+pyro_utils.MIN_CHUNK_SIZE = PYRO_CHUNK_SIZE
+pyro_utils.MAX_WORKERS = PYRO_WORKERS
 if hasattr(pyro_utils, "MAX_CONCURRENT_TRANSMISSIONS"):
-    pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = 12
+    pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = PYRO_MAX_CONCURRENT
 
-# cryptg check (encryption C mein karta hai = fast)
-try:
-    import cryptg
-    print("✅ cryptg loaded — encryption fast mode ON")
-except ImportError:
-    print("⚠️ cryptg not installed — run: pip install cryptg")
+if USE_CRYPTG:
+    try:
+        import cryptg
+        print("✅ cryptg loaded — encryption fast mode ON")
+    except ImportError:
+        print("⚠️ cryptg not installed — run: pip install cryptg")
 
 # ════════════════════════════════════════════════════════════════════════════════
 # ░ CLIENT SETUP
 # ════════════════════════════════════════════════════════════════════════════════
 
-client = TelegramClient("telethonbot", API_ID, API_HASH)
+# ✅ Yahan connection_mode NAHI hai, isliye error nahi aayega
+client = TelegramClient(
+    "telethonbot",
+    API_ID,
+    API_HASH,
+    connection_retries=TELETHON_RETRIES,
+    retry_delay=1,
+    auto_reconnect=True,
+    use_ipv6=USE_IPV6,
+)
 
 app = Client(
     "pyrogrambot",
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
-    workers=24,
+    workers=PYRO_WORKERS,
     sleep_threshold=30,
+    max_concurrent_transmissions=PYRO_MAX_CONCURRENT,
 )
 
 userbot = Client(
@@ -49,8 +58,9 @@ userbot = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     session_string=STRING,
-    workers=24,
+    workers=PYRO_WORKERS,
     sleep_threshold=30,
+    max_concurrent_transmissions=PYRO_MAX_CONCURRENT,
 ) if STRING else None
 
 
@@ -63,7 +73,7 @@ async def start_client():
             await userbot.start()
             print("Userbot started...")
         except Exception as e:
-            print(f"Hey honey!! check your premium string session, it may be invalid or expired {e}")
+            print(f"Hey honey!! check your premium string session, it may be invalid or expired: {e}")
             sys.exit(1)
     await app.start()
     print("Pyro App Started...")
