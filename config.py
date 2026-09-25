@@ -22,8 +22,8 @@ YTUB_COOKIES = """
 # ─── BOT / DATABASE CONFIG ──────────────────────────────────────────────────────
 API_ID       = os.getenv("API_ID", "20346550")
 API_HASH     = os.getenv("API_HASH", "bc79c3bea7a626887bdc0871eecf0327")
-BOT_TOKEN    = os.getenv("BOT_TOKEN", "8259347075:AAHJT9pxwYdzGPnOt_Oz5CGHxWIUowVkHdM")
-MONGO_DB     = os.getenv("MONGO_DB", "mongodb+srv://alexaditya:alexaditya950@cluster0.7j1hfjk.mongodb.net/?appName=Cluster0")
+BOT_TOKEN    = os.getenv("BOT_TOKEN", "8820652286:AAEeisR4EwkjUmirA4l6-uNllmMYvkywcys")
+MONGO_DB     = os.getenv("MONGO_DB", "mJOIN_LINK     = os.getenv(\"JOIN_LINK\", \"https://t.me/osnitboss\")ongodb+srv://alexaditya:alexaditya950@cluster0.7j1hfjk.mongodb.net/?appName=Cluster0")
 DB_NAME      = os.getenv("DB_NAME", "telegram_downloader")
 
 # ─── OWNER / CONTROL SETTINGS ───────────────────────────────────────────────────
@@ -47,6 +47,35 @@ PREMIUM_LIMIT  = int(os.getenv("PREMIUM_LIMIT", "500"))
 # ─── UI / LINKS ─────────────────────────────────────────────────────────────────
 JOIN_LINK     = os.getenv("JOIN_LINK", "https://t.me/osnitboss")
 ADMIN_CONTACT = os.getenv("ADMIN_CONTACT", "https://t.me/osnitboss")
+
+# ════════════════════════════════════════════════════════════════════════════════
+# ░ 🚀 FAST MODE CONFIGURATION (Speed Boost for Telethon + Pyrogram)
+# ════════════════════════════════════════════════════════════════════════════════
+
+# --- Pyrogram Fast Settings ---
+# Chunk size 1MB (default 256KB se 4x bada)
+PYRO_CHUNK_SIZE = 1024 * 1024
+
+# Parallel workers (connections) - 16 se 32 tak
+PYRO_WORKERS = 24
+
+# Max concurrent transmissions
+PYRO_MAX_CONCURRENT = 12
+
+# --- Telethon Fast Settings ---
+# Telethon chunk size 512KB
+TELETHON_CHUNK_SIZE = 512 * 1024
+
+# Telethon connection retries
+TELETHON_RETRIES = 5
+
+# Connection mode: "tcp" sabse fast hai (default "tcp_abridged" slow hai)
+TELETHON_CONNECTION_MODE = "tcp"
+
+# --- General Speed Booster ---
+USE_CRYPTG = True   # cryptg install karein, ye encryption ko C mein karta hai
+USE_IPV6 = False    # Agar server IPv6 support karta ho toh True karein
+FAST_UPLOAD = True  # Multi-threaded upload enable karein
 
 # ════════════════════════════════════════════════════════════════════════════════
 # ░ PREMIUM PLANS CONFIGURATION
