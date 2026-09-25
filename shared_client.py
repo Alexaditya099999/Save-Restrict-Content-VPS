@@ -1,5 +1,5 @@
-# Copyright (c) 2025 devgagan : https://github.com/devgaganin.  
-# Licensed under the GNU General Public License v3.0.  
+# Copyright (c) 2025 devgagan : https://github.com/devgaganin.
+# Licensed under the GNU General Public License v3.0.
 # See LICENSE file in the repository root for full license text.
 
 from telethon import TelegramClient
@@ -9,7 +9,7 @@ from pyrogram import utils as pyro_utils
 import sys
 
 # ════════════════════════════════════════════════════════════════════════════════
-# 🚀 FAST MODE SETTINGS (Speed Boost)
+# 🚀 FAST MODE SETTINGS
 # ════════════════════════════════════════════════════════════════════════════════
 
 pyro_utils.MIN_CHUNK_SIZE = 1024 * 1024
@@ -27,7 +27,7 @@ except ImportError:
 # ░ CLIENT SETUP
 # ════════════════════════════════════════════════════════════════════════════════
 
-# 🛑 YAHAN DHYAAN DEIN: "connection_mode" bilkul nahi hona chahiye
+# 🛑 DHYAAN DEIN: Yahan koi connection_mode NAHI hai
 client = TelegramClient("telethonbot", API_ID, API_HASH)
 
 app = Client(
