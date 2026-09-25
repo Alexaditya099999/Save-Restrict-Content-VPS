@@ -21,7 +21,7 @@ YTUB_COOKIES = """
 # ─── BOT / DATABASE CONFIG ──────────────────────────────────────────────────────
 API_ID       = os.getenv("API_ID", "20346550")
 API_HASH     = os.getenv("API_HASH", "bc79c3bea7a626887bdc0871eecf0327")
-BOT_TOKEN    = os.getenv("BOT_TOKEN", "8604521497:AAGIbUxP_mSehiNoClPuY_x_Y78kwCLtA_c")
+BOT_TOKEN    = os.getenv("BOT_TOKEN", "8705296483:AAE0Y36FCxArmX1lQudse9s3Q-Xzom3Xf5o")
 MONGO_DB     = os.getenv("MONGO_DB", "mongodb+srv://RahulRORO:Rahulboss@cluster0.xfwjmqk.mongodb.net/?appName=Cluster0")
 DB_NAME      = os.getenv("DB_NAME", "telegram_downloader")
 
