@@ -8,7 +8,6 @@ import importlib
 import os
 import sys
 
-# 🚀 Fast event loop policy (Linux par speed boost)
 if sys.platform.startswith("linux"):
     try:
         import uvloop
@@ -37,11 +36,17 @@ async def main():
 
 
 if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
     print("Starting clients ...")
     try:
-        asyncio.run(main())
+        loop.run_until_complete(main())
     except KeyboardInterrupt:
         print("Shutting down...")
     except Exception as e:
-        print(f"Fatal error: {e}")
+        print(e)
         sys.exit(1)
+    finally:
+        try:
+            loop.close()
+        except Exception:
+            pass
