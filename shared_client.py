@@ -9,13 +9,18 @@ from pyrogram import utils as pyro_utils
 import sys
 
 # ════════════════════════════════════════════════════════════════════════════════
-# 🚀 FAST MODE SETTINGS
+# 🚀 FAST MODE SETTINGS (DOWNLOAD + UPLOAD DONO FAST)
 # ════════════════════════════════════════════════════════════════════════════════
 
-pyro_utils.MIN_CHUNK_SIZE = 1024 * 1024
-pyro_utils.MAX_WORKERS = 24
+# ✅ FIX: Chunk size ko 1MB se badha kar 4MB kiya (download speed boost)
+pyro_utils.MIN_CHUNK_SIZE = 4 * 1024 * 1024  # 4MB per chunk
+
+# ✅ FIX: Workers badha diye (parallel download)
+pyro_utils.MAX_WORKERS = 32  # Pehle 24 tha, ab 32
+
+# ✅ FIX: Concurrent transmissions badha diye (ek saath zyada chunks download honge)
 if hasattr(pyro_utils, "MAX_CONCURRENT_TRANSMISSIONS"):
-    pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = 12
+    pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = 24  # Pehle 12 tha, ab 24
 
 try:
     import cryptg
@@ -24,10 +29,9 @@ except ImportError:
     print("⚠️ cryptg not installed — run: pip install cryptg")
 
 # ════════════════════════════════════════════════════════════════════════════════
-# ░ CLIENT SETUP
+# ░ CLIENT SETUP (DOWNLOAD + UPLOAD DONO FAST)
 # ════════════════════════════════════════════════════════════════════════════════
 
-# 🛑 DHYAAN DEIN: Yahan koi connection_mode NAHI hai
 client = TelegramClient("telethonbot", API_ID, API_HASH)
 
 app = Client(
@@ -35,7 +39,7 @@ app = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
-    workers=24,
+    workers=32,          # ✅ 24 se 32 kiya (download + upload parallel)
     sleep_threshold=30,
 )
 
@@ -44,7 +48,7 @@ userbot = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     session_string=STRING,
-    workers=24,
+    workers=32,          # ✅ 24 se 32 kiya
     sleep_threshold=30,
 ) if STRING else None
 
