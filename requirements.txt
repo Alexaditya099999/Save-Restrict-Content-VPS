@@ -21,3 +21,7 @@ yt-dlp
 requests
 cryptography
 
+# 🚀 FAST MODE ADDITIONS (Speed Boost)
+cryptg
+pyrogram==2.0.106
+TgCrypto
