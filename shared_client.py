@@ -7,19 +7,13 @@ from config import API_ID, API_HASH, BOT_TOKEN, STRING
 from pyrogram import Client
 from pyrogram import utils as pyro_utils
 import sys
-import atexit
 
 # ════════════════════════════════════════════════════════════════════════════════
-# 🚀 FAST MODE SETTINGS (DOWNLOAD + UPLOAD DONO FAST, CRASH SAFE)
+# 🚀 FAST MODE SETTINGS
 # ════════════════════════════════════════════════════════════════════════════════
 
-# ✅ Chunk size 4MB — download fast, memory safe
-pyro_utils.MIN_CHUNK_SIZE = 4 * 1024 * 1024
-
-# ✅ Workers 24 — balanced, crash nahi hoga
+pyro_utils.MIN_CHUNK_SIZE = 1024 * 1024
 pyro_utils.MAX_WORKERS = 24
-
-# ✅ Concurrent transmissions 12 — balanced
 if hasattr(pyro_utils, "MAX_CONCURRENT_TRANSMISSIONS"):
     pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = 12
 
@@ -40,7 +34,7 @@ app = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
-    workers=24,          # ✅ 24 (balanced)
+    workers=24,
     sleep_threshold=30,
 )
 
@@ -49,7 +43,7 @@ userbot = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     session_string=STRING,
-    workers=24,          # ✅ 24 (balanced)
+    workers=24,
     sleep_threshold=30,
 ) if STRING else None
 
@@ -66,23 +60,4 @@ async def start_client():
             sys.exit(1)
     await app.start()
     print("Pyro App Started...")
-
-    # ✅ Graceful shutdown — crash fix
-    def shutdown():
-        try:
-            if client.is_connected():
-                client.disconnect()
-        except Exception:
-            pass
-        try:
-            if userbot:
-                userbot.stop()
-        except Exception:
-            pass
-        try:
-            app.stop()
-        except Exception:
-            pass
-
-    atexit.register(shutdown)
     return client, app, userbot
