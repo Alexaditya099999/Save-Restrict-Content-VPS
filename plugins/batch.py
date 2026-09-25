@@ -85,12 +85,10 @@ async def upd_dlg(c):
         return False
 
 
-# ✅ FIXED: Public channel ke liye userbot (u) priority, bot (c) fallback
 async def get_msg(c, u, i, d, lt):
     try:
         if lt == 'public':
             try:
-                # ✅ Pehle userbot se try karo (public channels ke liye)
                 if u:
                     try:
                         xm = await u.get_messages(i, d)
@@ -102,7 +100,6 @@ async def get_msg(c, u, i, d, lt):
                         print(f"Userbot public fetch error: {e}")
                         emp[i] = True
 
-                # ✅ Bot token se try karo (agar userbot fail ho)
                 try:
                     if str(i).lower().endswith('bot'):
                         xm = await u.get_messages(i, d) if u else None
@@ -116,7 +113,6 @@ async def get_msg(c, u, i, d, lt):
                     print(f'Bot token public fetch error: {e}')
                     emp[i] = True
                 
-                # ✅ Agar dono fail, toh join karke userbot se try karo
                 if u and emp[i]:
                     try:
                         await u.join_chat(i)
@@ -136,7 +132,6 @@ async def get_msg(c, u, i, d, lt):
                 print(f'Error fetching public message: {e}')
                 return None
         else:
-            # Private channel — userbot zaroori hai
             if u:
                 try:
                     async for _ in u.get_dialogs(limit=50): pass
@@ -257,7 +252,8 @@ async def send_direct(c, m, tcid, ft=None, rtmid=None):
         print(f'Direct send error: {e}')
         return False
 
-# ✅ FIXED: Public channel ke liye send_direct ki jagah download+upload use karo
+
+# ✅ FIXED: Public channel ke liye DIRECT FORWARD, download-upload nahi
 async def process_msg(c, u, m, d, lt, uid, i):
     try:
         cfg_chat = await get_user_data_key(d, 'chat_id', None)
@@ -271,14 +267,46 @@ async def process_msg(c, u, m, d, lt, uid, i):
             else:
                 tcid = int(cfg_chat)
         
+        # ✅ PUBLIC CHANNEL: Seedha forward_messages use karo (1 second mein)
+        if lt == 'public':
+            try:
+                # Pehle try karo bot token se direct forward
+                if not str(i).lower().endswith('bot'):
+                    try:
+                        await c.forward_messages(tcid, i, m.id, reply_to_message_id=rtmid)
+                        print(f"✅ Forwarded directly by bot token: {i}/{m.id}")
+                        return 'Done.'
+                    except Exception as e:
+                        print(f'Bot forward error: {e}')
+                
+                # Bot se fail ho, toh userbot se forward karo
+                if u:
+                    try:
+                        await u.forward_messages(tcid, i, m.id, reply_to_message_id=rtmid)
+                        print(f"✅ Forwarded directly by userbot: {i}/{m.id}")
+                        return 'Done.'
+                    except Exception as e:
+                        print(f'Userbot forward error: {e}')
+                
+                # Dono fail, toh file_id se send karo (last resort)
+                if not emp.get(i, False):
+                    success = await send_direct(c, m, tcid, None, rtmid)
+                    if success:
+                        print(f"✅ Sent directly by file_id: {i}/{m.id}")
+                        return 'Done.'
+                
+                # Sab fail — download+upload fallback
+                print(f"⚠️ All direct methods failed for {i}/{m.id}, using download+upload")
+            except Exception as e:
+                print(f'Public forward error: {e}')
+        
+        # ✅ DOWNLOAD + UPLOAD (private channels ya fallback)
         if m.media:
             orig_text = m.caption.markdown if m.caption else ''
             proc_text = await process_text_with_rules(d, orig_text)
             user_cap = await get_user_data_key(d, 'caption', '')
             ft = f'{proc_text}\n\n{user_cap}' if proc_text and user_cap else user_cap if user_cap else proc_text
             
-            # ✅ FIXED: Public channel mein bhi download+upload karo (send_direct nahi)
-            # Kyunki restrict content mein file_id se direct send fail hota hai
             st = time.time()
             p = await c.send_message(d, 'Downloading...')
 
@@ -303,7 +331,6 @@ async def process_msg(c, u, m, d, lt, uid, i):
                 file_name = f"{time.time()}.jpg"
                 c_name = sanitize(file_name)
     
-            # ✅ FIXED: Download ke liye userbot (u) use karo, bot (c) nahi
             f = await u.download_media(m, file_name=c_name, progress=prog, progress_args=(c, d, p.id, st))
             
             if not f:
