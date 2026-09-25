@@ -201,12 +201,16 @@ async def get_ubot(uid):
         print(f"Error starting bot for user {uid}: {e}")
         return None
 
+
+# ✅ FIXED: get_uclient with fresh session load
 async def get_uclient(uid):
     ud = await get_user_data(uid)
     ubot = UB.get(uid)
     cl = UC.get(uid)
     if cl: return cl
-    if not ud: return ubot if ubot else None
+    if not ud:
+        print(f"⚠️ No user data for {uid}, using ubot or Y")
+        return ubot if ubot else Y
     xxx = ud.get('session_string')
     if xxx:
         try:
@@ -215,11 +219,14 @@ async def get_uclient(uid):
             await gg.start()
             await upd_dlg(gg)
             UC[uid] = gg
+            print(f"✅ User client started for {uid}")
             return gg
         except Exception as e:
-            print(f'User client error: {e}')
+            print(f'❌ User client error for {uid}: {e}')
             return ubot if ubot else Y
-    return Y
+    print(f"⚠️ No session string for {uid}")
+    return ubot if ubot else Y
+
 
 async def prog(c, t, C, h, m, st):
     global P
@@ -261,9 +268,17 @@ async def send_direct(c, m, tcid, ft=None, rtmid=None):
         return False
 
 
-# ✅ FIXED: process_msg with fallbacks and error logging
+# ✅ FIXED: process_msg with fresh client load
 async def process_msg(c, u, m, d, lt, uid, i):
     try:
+        # ✅ FRESH CLIENT LOAD — agar u None hai ya purana hai
+        if u is None:
+            print(f"⚠️ u is None in process_msg, loading fresh client...")
+            u = await get_uclient(uid)
+            if u is None:
+                print(f"❌ No user client for {uid}")
+                return 'Failed.'
+        
         cfg_chat = await get_user_data_key(d, 'chat_id', None)
         tcid = d
         rtmid = None
@@ -337,7 +352,6 @@ async def process_msg(c, u, m, d, lt, uid, i):
                 file_name = f"{time.time()}.jpg"
                 c_name = sanitize(file_name)
     
-            # ✅ Download with userbot, fallback to file_id send
             f = None
             try:
                 f = await u.download_media(m, file_name=c_name, progress=prog, progress_args=(c, d, p.id, st))
@@ -345,7 +359,6 @@ async def process_msg(c, u, m, d, lt, uid, i):
                 print(f'Download error: {e}')
                 f = None
             
-            # ✅ If download failed, try file_id direct send
             if not f:
                 print(f"⚠️ Download failed for {i}/{m.id}, trying file_id send...")
                 success = await send_direct(c, m, tcid, ft, rtmid)
@@ -454,7 +467,8 @@ async def process_msg(c, u, m, d, lt, uid, i):
     except Exception as e:
         print(f'process_msg fatal error: {e}')
         return f'Error: {str(e)[:50]}'
-        
+
+
 @X.on_message(filters.command(['batch', 'single']))
 async def process_cmd(c, m):
     uid = m.from_user.id
@@ -476,8 +490,15 @@ async def process_cmd(c, m):
         await pro.edit('Add your bot with /setbot first')
         return
     
+    # ✅ LOGIN CHECK — private channel ke liye session zaroori hai
+    ud = await get_user_data(uid)
+    if not ud or 'session_string' not in ud:
+        await pro.edit('⚠️ Please /login first to process private channels!')
+        return
+    
     Z[uid] = {'step': 'start' if cmd == 'batch' else 'start_single'}
     await pro.edit(f'Send {"start link..." if cmd == "batch" else "link you to process"}.')
+
 
 @X.on_message(filters.command(['cancel', 'stop']))
 async def cancel_cmd(c, m):
@@ -489,6 +510,7 @@ async def cancel_cmd(c, m):
             await m.reply_text('Failed to request cancellation. Please try again.')
     else:
         await m.reply_text('No active batch process found.')
+
 
 @X.on_message(filters.text & filters.private & ~login_in_progress & ~filters.command([
     'start', 'batch', 'cancel', 'login', 'logout', 'stop', 'set', 
