@@ -5,59 +5,22 @@
 from telethon import TelegramClient
 from config import API_ID, API_HASH, BOT_TOKEN, STRING
 from pyrogram import Client
-from pyrogram import utils as pyro_utils
 import sys
 
-# ════════════════════════════════════════════════════════════════════════════════
-# 🚀 FAST MODE SETTINGS
-# ════════════════════════════════════════════════════════════════════════════════
-
-pyro_utils.MIN_CHUNK_SIZE = 1024 * 1024
-pyro_utils.MAX_WORKERS = 24
-if hasattr(pyro_utils, "MAX_CONCURRENT_TRANSMISSIONS"):
-    pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = 12
-
-try:
-    import cryptg
-    print("✅ cryptg loaded — encryption fast mode ON")
-except ImportError:
-    print("⚠️ cryptg not installed — run: pip install cryptg")
-
-# ════════════════════════════════════════════════════════════════════════════════
-# ░ CLIENT SETUP
-# ════════════════════════════════════════════════════════════════════════════════
-
-# 🛑 DHYAAN DEIN: Yahan koi connection_mode NAHI hai
 client = TelegramClient("telethonbot", API_ID, API_HASH)
-
-app = Client(
-    "pyrogrambot",
-    api_id=API_ID,
-    api_hash=API_HASH,
-    bot_token=BOT_TOKEN,
-    workers=24,
-    sleep_threshold=30,
-)
-
-userbot = Client(
-    "4gbbot",
-    api_id=API_ID,
-    api_hash=API_HASH,
-    session_string=STRING,
-    workers=24,
-    sleep_threshold=30,
-) if STRING else None
+app = Client("pyrogrambot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+userbot = Client("4gbbot", api_id=API_ID, api_hash=API_HASH, session_string=STRING)
 
 async def start_client():
     if not client.is_connected():
         await client.start(bot_token=BOT_TOKEN)
         print("SpyLib started...")
-    if STRING and userbot:
+    if STRING:
         try:
             await userbot.start()
             print("Userbot started...")
         except Exception as e:
-            print(f"Hey honey!! check your premium string session, it may be invalid or expired: {e}")
+            print(f"Hey honey!! check your premium string session, it may be invalid of expire {e}")
             sys.exit(1)
     await app.start()
     print("Pyro App Started...")
