@@ -1,56 +1,42 @@
-# Copyright (c) 2025 devgagan : https://github.com/devgaganin.
-# Licensed under the GNU General Public License v3.0.
+# Copyright (c) 2025 devgagan : https://github.com/devgaganin.  
+# Licensed under the GNU General Public License v3.0.  
 # See LICENSE file in the repository root for full license text.
 
 from telethon import TelegramClient
 from config import API_ID, API_HASH, BOT_TOKEN, STRING
-from config import (
-    PYRO_CHUNK_SIZE, PYRO_WORKERS, PYRO_MAX_CONCURRENT,
-    TELETHON_RETRIES, USE_CRYPTG, USE_IPV6
-)
 from pyrogram import Client
 from pyrogram import utils as pyro_utils
 import sys
 
 # ════════════════════════════════════════════════════════════════════════════════
-# ░ 🚀 FAST MODE OVERRIDES (Speed Boost)
+# 🚀 FAST MODE SETTINGS (Speed Boost)
 # ════════════════════════════════════════════════════════════════════════════════
 
-pyro_utils.MIN_CHUNK_SIZE = PYRO_CHUNK_SIZE
-pyro_utils.MAX_WORKERS = PYRO_WORKERS
+pyro_utils.MIN_CHUNK_SIZE = 1024 * 1024
+pyro_utils.MAX_WORKERS = 24
 if hasattr(pyro_utils, "MAX_CONCURRENT_TRANSMISSIONS"):
-    pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = PYRO_MAX_CONCURRENT
+    pyro_utils.MAX_CONCURRENT_TRANSMISSIONS = 12
 
-if USE_CRYPTG:
-    try:
-        import cryptg
-        print("✅ cryptg loaded — encryption fast mode ON")
-    except ImportError:
-        print("⚠️ cryptg not installed — run: pip install cryptg")
+try:
+    import cryptg
+    print("✅ cryptg loaded — encryption fast mode ON")
+except ImportError:
+    print("⚠️ cryptg not installed — run: pip install cryptg")
 
 # ════════════════════════════════════════════════════════════════════════════════
 # ░ CLIENT SETUP
 # ════════════════════════════════════════════════════════════════════════════════
 
-# ✅ Yahan connection_mode NAHI hai, isliye error nahi aayega
-client = TelegramClient(
-    "telethonbot",
-    API_ID,
-    API_HASH,
-    connection_retries=TELETHON_RETRIES,
-    retry_delay=1,
-    auto_reconnect=True,
-    use_ipv6=USE_IPV6,
-)
+# 🛑 YAHAN DHYAAN DEIN: "connection_mode" bilkul nahi hona chahiye
+client = TelegramClient("telethonbot", API_ID, API_HASH)
 
 app = Client(
     "pyrogrambot",
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
-    workers=PYRO_WORKERS,
+    workers=24,
     sleep_threshold=30,
-    max_concurrent_transmissions=PYRO_MAX_CONCURRENT,
 )
 
 userbot = Client(
@@ -58,11 +44,9 @@ userbot = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     session_string=STRING,
-    workers=PYRO_WORKERS,
+    workers=24,
     sleep_threshold=30,
-    max_concurrent_transmissions=PYRO_MAX_CONCURRENT,
 ) if STRING else None
-
 
 async def start_client():
     if not client.is_connected():
