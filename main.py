@@ -1,5 +1,5 @@
-# Copyright (c) 2025 devgagan : https://github.com/devgaganin.
-# Licensed under the GNU General Public License v3.0.
+# Copyright (c) 2025 devgagan : https://github.com/devgaganin.  
+# Licensed under the GNU General Public License v3.0.  
 # See LICENSE file in the repository root for full license text.
 
 import asyncio
@@ -7,16 +7,6 @@ from shared_client import start_client
 import importlib
 import os
 import sys
-
-# 🚀 Fast event loop policy (Linux par speed boost)
-if sys.platform.startswith("linux"):
-    try:
-        import uvloop
-        uvloop.install()
-        print("✅ uvloop installed — event loop fast mode ON")
-    except ImportError:
-        print("ℹ️ uvloop not installed (optional). Install with: pip install uvloop")
-
 
 async def load_and_run_plugins():
     await start_client()
@@ -27,14 +17,12 @@ async def load_and_run_plugins():
         module = importlib.import_module(f"plugins.{plugin}")
         if hasattr(module, f"run_{plugin}_plugin"):
             print(f"Running {plugin} plugin...")
-            await getattr(module, f"run_{plugin}_plugin")()
-
+            await getattr(module, f"run_{plugin}_plugin")()  
 
 async def main():
     await load_and_run_plugins()
     while True:
-        await asyncio.sleep(1)
-
+        await asyncio.sleep(1)  
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()

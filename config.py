@@ -10,6 +10,7 @@ load_dotenv()
 # ░ CONFIGURATION SETTINGS
 # ════════════════════════════════════════════════════════════════════════════════
 
+# VPS --- FILL COOKIES 🍪 in """ ... """ 
 INST_COOKIES = """
 # write up here insta cookies
 """
@@ -21,19 +22,19 @@ YTUB_COOKIES = """
 # ─── BOT / DATABASE CONFIG ──────────────────────────────────────────────────────
 API_ID       = os.getenv("API_ID", "20346550")
 API_HASH     = os.getenv("API_HASH", "bc79c3bea7a626887bdc0871eecf0327")
-BOT_TOKEN    = os.getenv("BOT_TOKEN", "8820652286:AAEeisR4EwkjUmirA4l6-uNllmMYvkywcys")
+BOT_TOKEN    = os.getenv("BOT_TOKEN", "8259347075:AAHJT9pxwYdzGPnOt_Oz5CGHxWIUowVkHdM")
 MONGO_DB     = os.getenv("MONGO_DB", "mongodb+srv://alexaditya:alexaditya950@cluster0.7j1hfjk.mongodb.net/?appName=Cluster0")
 DB_NAME      = os.getenv("DB_NAME", "telegram_downloader")
 
 # ─── OWNER / CONTROL SETTINGS ───────────────────────────────────────────────────
-OWNER_ID     = list(map(int, os.getenv("OWNER_ID", "8460497291").split()))
-STRING       = os.getenv("STRING", None)
+OWNER_ID     = list(map(int, os.getenv("OWNER_ID", "8460497291").split()))  # space-separated list
+STRING       = os.getenv("STRING", None)  # optional session string
 LOG_GROUP    = int(os.getenv("LOG_GROUP", "-1004453123004"))
 FORCE_SUB    = int(os.getenv("FORCE_SUB", "-1004431674682"))
 
 # ─── SECURITY KEYS ──────────────────────────────────────────────────────────────
-MASTER_KEY   = os.getenv("MASTER_KEY", "gK8HzLfT9QpViJcYeB5wRa3DmN7P2xUq")
-IV_KEY       = os.getenv("IV_KEY", "s7Yx5CpVmE3F")
+MASTER_KEY   = os.getenv("MASTER_KEY", "gK8HzLfT9QpViJcYeB5wRa3DmN7P2xUq")  # session encryption
+IV_KEY       = os.getenv("IV_KEY", "s7Yx5CpVmE3F")  # decryption key
 
 # ─── COOKIES HANDLING ───────────────────────────────────────────────────────────
 YT_COOKIES   = os.getenv("YT_COOKIES", YTUB_COOKIES)
