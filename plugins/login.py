@@ -22,6 +22,7 @@ STEP_CODE = 2
 STEP_PASSWORD = 3
 login_cache = {}
 
+
 @bot.on_message(filters.command('login'))
 async def login_command(client, message):
     user_id = message.from_user.id
@@ -33,8 +34,8 @@ async def login_command(client, message):
 Example: `+12345678900`"""
         )
     login_cache[user_id] = {'status_msg': status_msg}
-    
-    
+
+
 @bot.on_message(filters.command("setbot"))
 async def set_bot_token(C, m):
     user_id = m.from_user.id
@@ -43,18 +44,17 @@ async def set_bot_token(C, m):
         try:
             await UB[user_id].stop()
             if UB.get(user_id, None):
-                del UB[user_id]  # Remove from dictionary
-                
+                del UB[user_id]
             try:
                 if os.path.exists(f"user_{user_id}.session"):
                     os.remove(f"user_{user_id}.session")
             except Exception:
                 pass
-            
             print(f"Stopped and removed old bot for user {user_id}")
         except Exception as e:
             print(f"Error stopping old bot for user {user_id}: {e}")
-            del UB[user_id]  # Remove from dictionary
+            if UB.get(user_id, None):
+                del UB[user_id]
 
     if len(args) < 2:
         await m.reply_text("⚠️ Please provide a bot token. Usage: `/setbot token`", quote=True)
@@ -63,17 +63,16 @@ async def set_bot_token(C, m):
     bot_token = args[1].strip()
     await save_user_bot(user_id, bot_token)
     await m.reply_text("✅ Bot token saved successfully.", quote=True)
-    
-    
+
+
 @bot.on_message(filters.command("rembot"))
 async def rem_bot_token(C, m):
     user_id = m.from_user.id
     if user_id in UB:
         try:
             await UB[user_id].stop()
-            
             if UB.get(user_id, None):
-                del UB[user_id]  # Remove from dictionary # Remove from dictionary
+                del UB[user_id]
             print(f"Stopped and removed old bot for user {user_id}")
             try:
                 if os.path.exists(f"user_{user_id}.session"):
@@ -83,7 +82,7 @@ async def rem_bot_token(C, m):
         except Exception as e:
             print(f"Error stopping old bot for user {user_id}: {e}")
             if UB.get(user_id, None):
-                del UB[user_id]  # Remove from dictionary  # Remove from dictionary
+                del UB[user_id]
             try:
                 if os.path.exists(f"user_{user_id}.session"):
                     os.remove(f"user_{user_id}.session")
@@ -92,7 +91,7 @@ async def rem_bot_token(C, m):
     await remove_user_bot(user_id)
     await m.reply_text("✅ Bot token removed successfully.", quote=True)
 
-    
+
 @bot.on_message(login_in_progress & filters.text & filters.private & ~filters.command([
     'start', 'batch', 'cancel', 'login', 'logout', 'stop', 'set', 'pay',
     'redeem', 'gencode', 'generate', 'keyinfo', 'encrypt', 'decrypt', 'keys', 'setbot', 'rembot']))
@@ -156,6 +155,13 @@ Please try again with /login.""")
                     """✅ Logged in successfully!!"""
                     )
                 set_user_step(user_id, None)
+                # ✅ Clear UC cache so new session loads
+                if UC.get(user_id, None):
+                    try:
+                        await UC[user_id].stop()
+                    except Exception:
+                        pass
+                    del UC[user_id]
             except SessionPasswordNeeded:
                 set_user_step(user_id, STEP_PASSWORD)
                 await edit_message_safely(status_msg,
@@ -185,6 +191,13 @@ Please enter your password:"""
                     """✅ Logged in successfully!!"""
                     )
                 set_user_step(user_id, None)
+                # ✅ Clear UC cache so new session loads
+                if UC.get(user_id, None):
+                    try:
+                        await UC[user_id].stop()
+                    except Exception:
+                        pass
+                    del UC[user_id]
             except BadRequest as e:
                 await edit_message_safely(status_msg,
                     f"""❌ Incorrect password: {str(e)}
@@ -198,6 +211,8 @@ Please try again with /login.""")
             await login_cache[user_id]['temp_client'].disconnect()
         login_cache.pop(user_id, None)
         set_user_step(user_id, None)
+
+
 async def edit_message_safely(message, text):
     """Helper function to edit message and handle errors"""
     try:
@@ -206,7 +221,8 @@ async def edit_message_safely(message, text):
         pass
     except Exception as e:
         logger.error(f'Error editing message: {e}')
-        
+
+
 @bot.on_message(filters.command('cancel'))
 async def cancel_command(client, message):
     user_id = message.from_user.id
@@ -227,7 +243,8 @@ async def cancel_command(client, message):
     else:
         temp_msg = await message.reply('No active login process to cancel.')
         await temp_msg.delete(5)
-        
+
+
 @bot.on_message(filters.command('logout'))
 async def logout_command(client, message):
     user_id = message.from_user.id
@@ -283,4 +300,3 @@ Still removing from database..."""
                 os.remove(f"{user_id}_client.session")
         except Exception:
             pass
-
