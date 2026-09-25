@@ -10,7 +10,6 @@ load_dotenv()
 # ░ CONFIGURATION SETTINGS
 # ════════════════════════════════════════════════════════════════════════════════
 
-# VPS --- FILL COOKIES 🍪 in """ ... """ 
 INST_COOKIES = """
 # write up here insta cookies
 """
@@ -27,14 +26,14 @@ MONGO_DB     = os.getenv("MONGO_DB", "mongodb+srv://alexaditya:alexaditya950@clu
 DB_NAME      = os.getenv("DB_NAME", "telegram_downloader")
 
 # ─── OWNER / CONTROL SETTINGS ───────────────────────────────────────────────────
-OWNER_ID     = list(map(int, os.getenv("OWNER_ID", "8460497291").split()))  # space-separated list
-STRING       = os.getenv("STRING", None)  # optional session string
+OWNER_ID     = list(map(int, os.getenv("OWNER_ID", "8460497291").split()))
+STRING       = os.getenv("STRING", None)
 LOG_GROUP    = int(os.getenv("LOG_GROUP", "-1004453123004"))
 FORCE_SUB    = int(os.getenv("FORCE_SUB", "-1004431674682"))
 
 # ─── SECURITY KEYS ──────────────────────────────────────────────────────────────
-MASTER_KEY   = os.getenv("MASTER_KEY", "gK8HzLfT9QpViJcYeB5wRa3DmN7P2xUq")  # session encryption
-IV_KEY       = os.getenv("IV_KEY", "s7Yx5CpVmE3F")  # decryption key
+MASTER_KEY   = os.getenv("MASTER_KEY", "gK8HzLfT9QpViJcYeB5wRa3DmN7P2xUq")
+IV_KEY       = os.getenv("IV_KEY", "s7Yx5CpVmE3F")
 
 # ─── COOKIES HANDLING ───────────────────────────────────────────────────────────
 YT_COOKIES   = os.getenv("YT_COOKIES", YTUB_COOKIES)
@@ -47,16 +46,6 @@ PREMIUM_LIMIT  = int(os.getenv("PREMIUM_LIMIT", "500"))
 # ─── UI / LINKS ─────────────────────────────────────────────────────────────────
 JOIN_LINK     = os.getenv("JOIN_LINK", "https://t.me/osnitboss")
 ADMIN_CONTACT = os.getenv("ADMIN_CONTACT", "https://t.me/osnitboss")
-
-# ════════════════════════════════════════════════════════════════════════════════
-# ░ 🚀 FAST MODE CONFIGURATION (Speed Boost)
-# ════════════════════════════════════════════════════════════════════════════════
-PYRO_CHUNK_SIZE = 1024 * 1024        # 1MB chunks (default 256KB)
-PYRO_WORKERS = 24                    # Parallel workers
-PYRO_MAX_CONCURRENT = 12             # Max concurrent transmissions
-TELETHON_RETRIES = 5                 # Connection retries
-USE_CRYPTG = True                    # cryptg install karein
-USE_IPV6 = False                     # Agar server IPv6 support karta ho toh True karein
 
 # ════════════════════════════════════════════════════════════════════════════════
 # ░ PREMIUM PLANS CONFIGURATION
