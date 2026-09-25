@@ -7,9 +7,10 @@ from config import API_ID, API_HASH, BOT_TOKEN, STRING
 from pyrogram import Client
 from pyrogram import utils as pyro_utils
 import sys
+import asyncio
 
 # ════════════════════════════════════════════════════════════════════════════════
-# 🚀 FAST MODE SETTINGS
+# 🚀 FAST MODE SETTINGS (BALANCED)
 # ════════════════════════════════════════════════════════════════════════════════
 
 pyro_utils.MIN_CHUNK_SIZE = 1024 * 1024
@@ -52,6 +53,7 @@ async def start_client():
     if not client.is_connected():
         await client.start(bot_token=BOT_TOKEN)
         print("SpyLib started...")
+
     if STRING and userbot:
         try:
             await userbot.start()
@@ -59,14 +61,7 @@ async def start_client():
         except Exception as e:
             print(f"Hey honey!! check your premium string session, it may be invalid or expired: {e}")
             sys.exit(1)
+
     await app.start()
     print("Pyro App Started...")
-
-    # ✅ YEH 4 LINES ADD KI HAIN — "Event loop is closed" ERROR FIX
-    import atexit
-    atexit.register(lambda: client.disconnect() if client.is_connected() else None)
-    if userbot:
-        atexit.register(lambda: userbot.stop())
-    atexit.register(lambda: app.stop())
-
     return client, app, userbot
